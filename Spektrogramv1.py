@@ -1,5 +1,7 @@
 # Import
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.io import wavfile
 
 def directFourier(x, N):
     """
@@ -8,7 +10,7 @@ def directFourier(x, N):
     :param N: Längden av utsignalen
     :return: Utsignal (array) i frek.domän
     """
-    return fft(x, n=N)
+    return np.fft.fft(x, n=N)
 
 def pixelIntensity(X):
     """
@@ -35,12 +37,34 @@ def averageFreq(X):
     :param X: Signal i frekdomän
     :return: Medelvärde (float)
     """
-    return np.sum(X) / len(X)
+    return np.mean(X)
 
 def main():
-    array = ...
-    fönster = hammingWindow(N)
-    for sample in ljudfil:
-        x_fft = directFourtier(x)
-        x_apa = x_fft * fönster
-        array[i] = averageFreq(x_apa)
+    fs, sound = wavfile.read('cantina.wav')
+    N = len(sound)
+    M = 300
+
+    window = hammingWindow(N)
+    sound_fft = directFourier(sound, N) * window
+
+    i = 0
+    spectogram = np.array(())
+    while True:
+        if i+M > N:
+            freq = averageFreq(sound_fft[i:N])  #ska man ta mean?
+            break
+        else:
+            freq = averageFreq(sound_fft[i:i+M])
+
+        spectogram = np.append(spectogram, freq)
+        #spectogram = np.rint(spectogram) #Avrundar alla floats till ints
+        i += M
+
+    
+    plt.plot(spectogram)
+    plt.show()
+
+
+
+
+main()
