@@ -11,7 +11,7 @@ def sinusTone(x):
    :param x: Bestämmer hastigheten på sinusen
    :return: en sinuston
    """
-    vinkel = np.linspace(0, np.pi * 2, 1000)
+    vinkel = np.linspace(0, np.pi * 2, 100)
     sinus = np.sin(x * vinkel)
     return sinus
 
@@ -79,6 +79,23 @@ def createSpecto(sound_fft, M):
 
     return spectogram
 
+def longSinus(n):
+    sinus1 = sinusTone(1)
+    for x in range(0, n):
+        sinus1 = np.append(sinus1, sinus1)
+
+    sinus12 = np.append(sinus1, sinusTone(2))
+    for x in range(0, n):
+        sinus12 = np.append(sinus12, sinusTone(2))
+
+    sinus123 = np.append(sinus12, sinusTone(0.5))
+
+    for x in range(0, n):
+        sinus123 = np.append(sinus123, sinusTone(0.5))
+
+    return sinus123
+
+
 
 def main():
     fs, sound = wavfile.read('cantina.wav')
@@ -93,11 +110,18 @@ def main():
     spectogram = np.abs(spectogram)
     spectogram = np.fft.ifft(spectogram)
 
-    sinus = sinusTone(1)
+    sinus=longSinus(10)
+
+
+
+
+    plt.plot(sinus)
+    plt.show()
     plt.plot(np.fft.fft(sinus))
     plt.show()
+    sinfft=np.fft.fft(sinus)
 
-    plt.plot(spectogram)
+    plt.plot(createSpecto(sinfft, M))
     plt.show()
 
 
