@@ -1,16 +1,18 @@
 # Import
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 
-def sinustone(x):
+def sinusTone(x):
     """
-
-    :param x: Hastigheten på
-    :return:
-    """
-    sinus=np.zeros(1000);
-    vinkel=linspace()
+    Skapar en sinuston med vald hastighet.
+   :param x: Bestämmer hastigheten på sinusen
+   :return: en sinuston
+   """
+    vinkel=np.linspace(0,np.pi*2,1000)
+    sinus=np.sin(x*vinkel)
+    return sinus
 
 def directFourier(x, N):
     """
@@ -48,6 +50,29 @@ def averageFreq(X):
     """
     return np.mean(X)
 
+def createSpecto(sound_fft, M):
+    """
+    Skapar ett spektogram.
+    :param sound: Insignal (i frek.domän)
+    :param M: För varje ny kolumn flyttar man fönstret ett fixt antal sampel M
+    :return: Spektogram (array)
+    """
+    N = len(sound_fft)
+    i = 0
+    spectogram = np.array(())
+    while True:
+        if i + M >= N:
+            freq = averageFreq(sound_fft[i:N])  # ska man ta mean?
+            break
+        else:
+            freq = averageFreq(sound_fft[i:i + M])
+
+        spectogram = np.append(spectogram, freq)
+        # spectogram = np.rint(spectogram) #Avrundar alla floats till ints
+        i += M
+
+    return spectogram
+
 def main():
     fs, sound = wavfile.read('cantina.wav')
     N = len(sound)
@@ -57,24 +82,18 @@ def main():
     sound_fft = directFourier(sound, N) * window
     #sound_fft = np.fft.fftshift(sound_fft)
 
-    i = 0
-    spectogram = np.array(())
-    while True:
-        if i+M >= N:
-            freq = averageFreq(sound_fft[i:N])  #ska man ta mean?
-            break
-        else:
-            freq = averageFreq(sound_fft[i:i+M])
-
-        spectogram = np.append(spectogram, freq)
-        #spectogram = np.rint(spectogram) #Avrundar alla floats till ints
-        i += M
-
+    spectogram = createSpecto(sound_fft, M)
+    spectogram = np.abs(spectogram)
     spectogram = np.fft.ifft(spectogram)
 
-    print(len(spectogram))
+    sinus = sinusTone(1)
+    plt.plot(np.fft.fft(sinus))
+    plt.show()
+    
+
     plt.plot(spectogram)
     plt.show()
+
 
 
 main()
