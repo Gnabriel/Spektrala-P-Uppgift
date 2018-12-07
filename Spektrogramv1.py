@@ -46,11 +46,12 @@ def main():
 
     window = hammingWindow(N)
     sound_fft = directFourier(sound, N) * window
+    #sound_fft = np.fft.fftshift(sound_fft)
 
     i = 0
     spectogram = np.array(())
     while True:
-        if i+M > N:
+        if i+M >= N:
             freq = averageFreq(sound_fft[i:N])  #ska man ta mean?
             break
         else:
@@ -60,11 +61,11 @@ def main():
         #spectogram = np.rint(spectogram) #Avrundar alla floats till ints
         i += M
 
-    
+    spectogram = np.fft.ifft(spectogram)
+
+    print(len(spectogram))
     plt.plot(spectogram)
     plt.show()
-
-
 
 
 main()
