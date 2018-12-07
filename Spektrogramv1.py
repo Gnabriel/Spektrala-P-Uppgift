@@ -3,6 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 
+def sinustone(x):
+    """
+
+    :param x: Hastigheten på
+    :return:
+    """
+    sinus=np.zeros(1000);
+    vinkel=linspace()
+
 def directFourier(x, N):
     """
     Transformerar en signal från tidsdomän till frek.domän.
