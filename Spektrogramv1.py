@@ -1,16 +1,18 @@
+# -*- coding: utf-8 -*-
 # Import
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
+from IPython.display import Audio
 
 def sinustone(x):
     """
-
-    :param x: Hastigheten på
-    :return:
+    :param x: Bestämmer hastigheten på sinusen
+    :return: en sinuston
     """
-    sinus=np.zeros(1000);
-    vinkel=linspace()
+    vinkel=np.linspace(0,np.pi*2,1000)
+    sinus=np.sin(x*vinkel)
+    return sinus
 
 def directFourier(x, N):
     """
@@ -52,11 +54,15 @@ def main():
     fs, sound = wavfile.read('cantina.wav')
     N = len(sound)
     M = 300
+    sinus1=sinustone(1)
+    sinus2=sinustone(2)
+    sinus3=sinustone(0.5)
+
 
     window = hammingWindow(N)
     sound_fft = directFourier(sound, N) * window
     #sound_fft = np.fft.fftshift(sound_fft)
-
+    """ 
     i = 0
     spectogram = np.array(())
     while True:
@@ -74,7 +80,23 @@ def main():
 
     print(len(spectogram))
     plt.plot(spectogram)
+    plt.show() """
+
+    plt.plot(sinus1)
     plt.show()
+    plt.plot(sinus2)
+    plt.show()
+    plt.plot(sinus3)
+    plt.show()
+    sinus123=np.append(sinus1,sinus2)
+    sinus123=np.append(sinus123,sinus3)
+    plt.plot(sinus123)
+    plt.show()
+
+    Audio(sinus123,rate=6000)
+    print(klar)
+
+
 
 
 main()
