@@ -4,14 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 
-def sinustone(x):
+def sinusTone(x):
     """
-
-    :param x: Hastigheten på
-    :return:
-    """
-    sinus=np.zeros(1000);
-    vinkel=linspace()
+    Skapar en sinuston med vald hastighet.
+   :param x: Bestämmer hastigheten på sinusen
+   :return: en sinuston
+   """
+    vinkel=np.linspace(0,np.pi*2,1000)
+    sinus=np.sin(x*vinkel)
+    return sinus
 
 def directFourier(x, N):
     """
@@ -85,9 +86,14 @@ def main():
     spectogram = np.abs(spectogram)
     spectogram = np.fft.ifft(spectogram)
 
-    print(len(spectogram))
+    sinus = sinusTone(1)
+    plt.plot(np.fft.fft(sinus))
+    plt.show()
+    
+
     plt.plot(spectogram)
     plt.show()
+
 
 
 main()
