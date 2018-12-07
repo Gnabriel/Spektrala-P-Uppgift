@@ -1,18 +1,20 @@
-# -*- coding: utf-8 -*-
 # Import
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
-from IPython.display import Audio
 
-def sinustone(x):
+
+def sinusTone(x):
     """
-    :param x: Bestämmer hastigheten på sinusen
-    :return: en sinuston
-    """
-    vinkel=np.linspace(0,np.pi*2,1000)
-    sinus=np.sin(x*vinkel)
+    Skapar en sinuston med vald hastighet.
+   :param x: Bestämmer hastigheten på sinusen
+   :return: en sinuston
+   """
+    vinkel = np.linspace(0, np.pi * 2, 1000)
+    sinus = np.sin(x * vinkel)
     return sinus
+
 
 def directFourier(x, N):
     """
@@ -23,6 +25,7 @@ def directFourier(x, N):
     """
     return np.fft.fft(x, n=N)
 
+
 def pixelIntensity(X):
     """
     Räknar ut pixelintensiteten kring en tidpunkt.
@@ -30,6 +33,7 @@ def pixelIntensity(X):
     :return: Pixelintensitet i en array
     """
     return np.abs(np.log10(X))
+
 
 def hammingWindow(N):
     """
@@ -42,6 +46,7 @@ def hammingWindow(N):
         w[n] = 0.53836 - 0.46164 * np.cos((2 * np.pi * n) / (N - 1))
     return w
 
+
 def averageFreq(X):
     """
     Räknar ut medelvärdet av alla frekvenser i en viss tidpunkt.
@@ -50,52 +55,50 @@ def averageFreq(X):
     """
     return np.mean(X)
 
-def main():
-    fs,sound = wavfile.read('cantina.wav')
-    N = len(sound)
-    M = 300
-    sinus1=sinustone(1)
-    sinus2=sinustone(2)
-    sinus3=sinustone(0.5)
 
-
-    window = hammingWindow(N)
-    sound_fft = directFourier(sound, N) * window
-    #sound_fft = np.fft.fftshift(sound_fft)
-    """ 
+def createSpecto(sound_fft, M):
+    """
+    Skapar ett spektogram.
+    :param sound: Insignal (i frek.domän)
+    :param M: För varje ny kolumn flyttar man fönstret ett fixt antal sampel M
+    :return: Spektogram (array)
+    """
+    N = len(sound_fft)
     i = 0
     spectogram = np.array(())
     while True:
-        if i+M >= N:
-            freq = averageFreq(sound_fft[i:N])  #ska man ta mean?
+        if i + M >= N:
+            freq = averageFreq(sound_fft[i:N])  # ska man ta mean?
             break
         else:
-            freq = averageFreq(sound_fft[i:i+M])
+            freq = averageFreq(sound_fft[i:i + M])
 
         spectogram = np.append(spectogram, freq)
-        #spectogram = np.rint(spectogram) #Avrundar alla floats till ints
+        # spectogram = np.rint(spectogram) #Avrundar alla floats till ints
         i += M
 
+    return spectogram
+
+
+def main():
+    fs, sound = wavfile.read('cantina.wav')
+    N = len(sound)
+    M = 300
+
+    window = hammingWindow(N)
+    sound_fft = directFourier(sound, N) * window
+    # sound_fft = np.fft.fftshift(sound_fft)
+
+    spectogram = createSpecto(sound_fft, M)
+    spectogram = np.abs(spectogram)
     spectogram = np.fft.ifft(spectogram)
 
-    print(len(spectogram))
+    sinus = sinusTone(1)
+    plt.plot(np.fft.fft(sinus))
+    plt.show()
+
     plt.plot(spectogram)
-    plt.show() """
-
-    plt.plot(sinus1)
     plt.show()
-    plt.plot(sinus2)
-    plt.show()
-    plt.plot(sinus3)
-    plt.show()
-    sinus123=np.append(sinus1,sinus2)
-    sinus123=np.append(sinus123,sinus3)
-    plt.plot(sinus123)
-    plt.show()
-
-    Audio(sound,rate=fs)
-
-
 
 
 main()
