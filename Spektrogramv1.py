@@ -51,7 +51,7 @@ def averageFreq(X):
     return np.mean(X)
 
 def main():
-    fs, sound = wavfile.read('cantina.wav')
+    fs,sound = wavfile.read('cantina.wav')
     N = len(sound)
     M = 300
     sinus1=sinustone(1)
@@ -93,8 +93,7 @@ def main():
     plt.plot(sinus123)
     plt.show()
 
-    Audio(sinus123,rate=6000)
-    print(klar)
+    Audio(sound,rate=fs)
 
 
 
