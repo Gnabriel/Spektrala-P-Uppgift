@@ -112,6 +112,8 @@ def main():
 
     sinus=longSinus(10)
 
+    arr
+
 
 
 
