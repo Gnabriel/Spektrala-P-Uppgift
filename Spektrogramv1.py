@@ -64,17 +64,31 @@ def createSpecto(fs, sound, M):
     cols_amount = int(len(sound) / M)
     spectogram = np.zeros((M//2, cols_amount))
     N = 0
+
+    max_ffts=[]
     for j in range(cols_amount):
         if N + M <= len(sound):
             soundCol = sound[N:N + M]* hammingWindow(M)
             freqCol = np.fft.fft(soundCol)[0:M//2]
+
+            #max_ffts.append(max(abs(freqCol)))
+
             #freqCol = np.fft.fftshift(freqCol) * hammingWindow(M)
             freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
         N += M
     sound_time = len(sound) / fs
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
-    freq_array = np.linspace(0, 80, spectogram.shape[0])
+
+    # Vi hittar max frekvens för att få rätt skala
+    #print(spectogram.shape[0]*spectogram.shape[1])
+    #freqs = np.fft.fftfreq(spectogram.shape[0]*spectogram.shape[1])
+    #index=freqs.index(max(max_ffts))
+    #print(index)
+
+    #max_freq=freqs[index]
+    #hertz=abs(max_freq*fs)
+    freq_array = np.linspace(0, 8000, spectogram.shape[0])
 
     #print(len(time_array))
     #print(len(freq_array))
@@ -107,7 +121,7 @@ def main():
     plt.show()
 
     #Vi plottar en sinuston med våran egna
-    sinus = sinusTone(1000, 8)
+    sinus = sinusTone(2000, 8)
     spectoPlot(1/100, sinus, 129)
 
     #Samma sinuston med numpys egna
