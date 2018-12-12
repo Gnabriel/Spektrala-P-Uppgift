@@ -62,23 +62,23 @@ def createSpecto(fs, sound, M):
     """
 
     cols_amount = int(len(sound) / M)
-    spectogram = np.zeros((M, cols_amount))
+    spectogram = np.zeros((M//2, cols_amount))
     N = 0
     for j in range(cols_amount):
         if N + M <= len(sound):
-            soundCol = sound[N:N + M]
-            freqCol = np.fft.fft(soundCol) * hammingWindow(M)
+            soundCol = sound[N:N + M]* hammingWindow(M)
+            freqCol = np.fft.fft(soundCol)[0:M//2]
             #freqCol = np.fft.fftshift(freqCol) * hammingWindow(M)
             freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
         N += M
     sound_time = len(sound) / fs
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
-    freq_array = np.linspace(0, 8000, spectogram.shape[0])
+    freq_array = np.linspace(0, 80, spectogram.shape[0])
 
-    print(len(time_array))
-    print(len(freq_array))
-    print(spectogram.shape)
+    #print(len(time_array))
+    #print(len(freq_array))
+    #print(spectogram.shape)
     return time_array, freq_array, spectogram
 
 def spectoPlot(fs, sound, M):
@@ -95,20 +95,22 @@ def spectoPlot(fs, sound, M):
 
 def main():
     fs, sound = wavfile.read('cantina.wav')
-    time=len(sound)/fs
 
+    #Vårat spectrogram
     spectoPlot(fs, sound, 129)
 
-
+    # Numpys egna spectrogram
     f, t, Sxx = signal.spectrogram(sound, fs)
     plt.pcolormesh(t, f, np.log(Sxx))
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
     plt.show()
 
-    sinus = sinusTone(1, 8)
+    #Vi plottar en sinuston med våran egna
+    sinus = sinusTone(1000, 8)
     spectoPlot(1/100, sinus, 129)
 
+    #Samma sinuston med numpys egna
     f, t, Sxx = signal.spectrogram(sinus, 1/100)
     plt.pcolormesh(t, f, np.log(Sxx))
     plt.ylabel('Frequency [Hz]')
