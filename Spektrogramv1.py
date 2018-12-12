@@ -66,14 +66,16 @@ def createSpecto(fs, sound, M):
     N = 0
 
     max_ffts=[]
+    max_index=[]
+
     for j in range(cols_amount):
         if N + M <= len(sound):
             soundCol = sound[N:N + M]* hammingWindow(M)
             freqCol = np.fft.fft(soundCol)[0:M//2]
 
-            #max_ffts.append(max(abs(freqCol)))
+            max_ffts.append(max(abs(freqCol)))
+            max_index.append(np.argmax(max(abs(freqCol))))
 
-            #freqCol = np.fft.fftshift(freqCol) * hammingWindow(M)
             freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
         N += M
@@ -81,18 +83,23 @@ def createSpecto(fs, sound, M):
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
 
     # Vi hittar max frekvens för att få rätt skala
-    #print(spectogram.shape[0]*spectogram.shape[1])
-    #freqs = np.fft.fftfreq(spectogram.shape[0]*spectogram.shape[1])
-    #index=freqs.index(max(max_ffts))
-    #print(index)
+    freqs = np.fft.fftfreq(M)
+    indxMax=np.argmax(max_ffts)
 
-    #max_freq=freqs[index]
-    #hertz=abs(max_freq*fs)
+
+    print(indxMax)
+    print( max_ffts[indxMax] )
+    print(max_index[indxMax])
+
+    freq=freqs[indxMax//3]
+    print(freq)
+    print(freqs)
+
+    hertz=abs(freq*fs)
+    print(hertz)
+
     freq_array = np.linspace(0, 8000, spectogram.shape[0])
 
-    #print(len(time_array))
-    #print(len(freq_array))
-    #print(spectogram.shape)
     return time_array, freq_array, spectogram
 
 def spectoPlot(fs, sound, M):
