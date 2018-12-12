@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
+from scipy import signal
 
 def sinusTone(x, tone_length):
     """
@@ -10,8 +11,8 @@ def sinusTone(x, tone_length):
    :param x: Bestämmer hastigheten på sinusen
    :return: en sinuston
    """
-    vinkel=np.linspace(0,np.pi*2,100)
-    sinus=np.sin(x*vinkel)
+    vinkel = np.linspace(0,np.pi*2,100)
+    sinus = np.sin(x*vinkel)
     for i in range(tone_length):
         sinus = np.append(sinus, sinus)
     return sinus
@@ -52,52 +53,67 @@ def averageFreq(X):
     """
     return np.mean(X)
 
-def createSpecto(sound, M):
+def createSpecto(fs, sound, M):
     """
     Skapar ett spektogram.
-    :param sound: Insignal (i frek.domän)
+    :param sound: Insignal (i tidsdomän)
     :param M: För varje ny kolumn flyttar man fönstret ett fixt antal sampel M
     :return: Spektogram (array)
     """
-    #sound_fft = np.fft.fftshift(sound_fft)
 
-    spectogram = np.zeros((M, int(len(sound) / M)))
+    cols_amount = int(len(sound) / M)
+    spectogram = np.zeros((M, cols_amount))
     N = 0
-    for j in range(int(len(sound) / M)):
-        if N + M <= N:
+    for j in range(cols_amount):
+        if N + M <= len(sound):
             soundCol = sound[N:N + M]
             freqCol = np.fft.fft(soundCol) * hammingWindow(M)
+            #freqCol = np.fft.fftshift(freqCol) * hammingWindow(M)
+            freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
         N += M
+    sound_time = len(sound) / fs
+    time_array = np.linspace(0, sound_time, spectogram.shape[1])
+    freq_array = np.linspace(0, 8000, spectogram.shape[0])
 
-    return spectogram
+    print(len(time_array))
+    print(len(freq_array))
+    print(spectogram.shape)
+    return time_array, freq_array, spectogram
 
-def spectoPlot(sound):
+def spectoPlot(fs, sound, M):
     """
     Startar hela skiten samt plottar.
     :param sound: Insignal i tidsdomänen.
     :return: None
     """
-    N = len(sound)
-    M = 300
+    spectogram = createSpecto(fs, sound, M)
 
-    window = hammingWindow(N)
-    sound_fft = directFourier(sound, N) * window
-    # sound_fft = np.fft.fftshift(sound_fft)
-
-    spectogram = createSpecto(sound_fft, M)
-
-    plt.imshow(spectogram)
-    #plt.plot(spectogram)
+    plt.pcolormesh(spectogram[0], spectogram[1], spectogram[2])
     plt.show()
 
 
 def main():
     fs, sound = wavfile.read('cantina.wav')
-    spectoPlot(sound)
+    time=len(sound)/fs
 
-    sinus = sinusTone(1, 7)
-    spectoPlot(sinus)
+    spectoPlot(fs, sound, 129)
+
+
+    f, t, Sxx = signal.spectrogram(sound, fs)
+    plt.pcolormesh(t, f, np.log(Sxx))
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    plt.show()
+
+    sinus = sinusTone(1, 8)
+    spectoPlot(1/100, sinus, 129)
+
+    f, t, Sxx = signal.spectrogram(sinus, 1/100)
+    plt.pcolormesh(t, f, np.log(Sxx))
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    plt.show()
 
 
 
