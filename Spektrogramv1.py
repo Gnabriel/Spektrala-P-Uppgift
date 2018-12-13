@@ -1,4 +1,6 @@
 # Import
+# Jussi Kangas och Gabriel Ellebrink
+# jkangas@kth.se och elleb@kth.se
 
 import numpy as np
 import matplotlib.pyplot as plt
