@@ -7,17 +7,21 @@ from scipy import signal
 from mpl_toolkits.mplot3d import Axes3D
 
 
+
 def sinusTone(x, tone_length):
+
     """
     Skapar en sinuston med vald hastighet.
    :param x: Bestämmer hastigheten på sinusen
    :return: en sinuston
    """
+
     vinkel = np.linspace(0,np.pi*2,100)
     sinus = np.sin(x*vinkel)
     for i in range(tone_length):
         sinus = np.append(sinus, sinus)
     return sinus
+
 
 def directFourier(x, N):
     """
@@ -28,6 +32,7 @@ def directFourier(x, N):
     """
     return np.fft.fft(x, n=N)
 
+
 def pixelIntensity(X):
     """
     Räknar ut pixelintensiteten kring en tidpunkt.
@@ -35,6 +40,7 @@ def pixelIntensity(X):
     :return: Pixelintensitet i en array
     """
     return np.abs(np.log10(X))
+
 
 def hammingWindow(N):
     """
@@ -47,6 +53,7 @@ def hammingWindow(N):
         w[n] = 0.53836 - 0.46164 * np.cos((2 * np.pi * n) / (N - 1))
     return w
 
+
 def averageFreq(X):
     """
     Räknar ut medelvärdet av alla frekvenser i en viss tidpunkt.
@@ -54,6 +61,7 @@ def averageFreq(X):
     :return: Medelvärde (float)
     """
     return np.mean(X)
+
 
 def createSpecto(fs, sound, M):
     """
@@ -143,6 +151,7 @@ def main():
     ax = plt.axes(projection='3d')
     ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
                     cmap='plasma', edgecolor='none')
+
     plt.show()
     """
     """"
