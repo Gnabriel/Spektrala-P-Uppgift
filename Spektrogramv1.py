@@ -4,9 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy import signal
-from mpl_toolkits.mplot3d import Axes3D
-
-
 
 
 def sinusTone(x, tone_length):
@@ -81,23 +78,29 @@ def createSpecto(fs, sound, M):
             soundCol = sound[N:N + M]* hammingWindow(M)
             freqCol = np.fft.fft(soundCol)[0:M//2]
 
-            zeroIndx=np.where(freqCol == 0)
+            zeroIndx = np.where(freqCol == 0)
             if(len(zeroIndx[0])>=1):
                 for index in zeroIndx:
                     freqCol[index]=1
 
             freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
+
+            # frekvenskoefficienter
+            freqs_coff = np.fft.fftfreq(len(freqCol))
         N += M
     sound_time = len(sound) / fs
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
 
     # Vi hittar max frekvens för att få rätt skala
-    freqs = np.fft.fftfreq(len(spectogram))
-    #freq=freqs[indxMax[0]+1]
-    #hertz=abs(freq*fs)
+    max_freq = np.max(spectogram)
+    print('Max freq = ' + str(max_freq))
+    max_freq = np.fft.ifft(np.array([max_freq]))
 
-    freq_array = np.linspace(0, 8000, spectogram.shape[0])
+
+    #max_freq_hz = abs(max_freq * fs)
+
+    freq_array = np.linspace(0, max_freq, spectogram.shape[0])
 
     return time_array, freq_array, spectogram
 
@@ -112,22 +115,6 @@ def spectoPlot(fs, sound, M):
     plt.pcolormesh(spectogram[0], spectogram[1], spectogram[2])
     plt.show()
 
-    """"
-    #3D kurva
-    SpectoLine = spectogram[2].ravel()
-    time = np.linspace(0, max(spectogram[0]), len(SpectoLine))
-    freq = np.linspace(0, max(spectogram[1]), len(SpectoLine))
-    ax = plt.axes(projection='3d')
-    ax.plot3D(time, freq, SpectoLine)
-    plt.show()
-
-    #3D yta
-    X, Y = np.meshgrid(spectogram[0], spectogram[1])
-    ax = plt.axes(projection='3d')
-    ax.plot_surface(X, Y, spectogram[2], rstride=1, cstride=1,
-                    cmap='plasma', edgecolor='none')
-    plt.show()
-    """
 
 def main():
     plt.close()
@@ -153,24 +140,6 @@ def main():
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
     plt.show()
-
-    """"
-    X, Y = np.meshgrid(t, f)
-    ax = plt.axes(projection='3d')
-    ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
-                    cmap='plasma', edgecolor='none')
-
-    plt.show()
-    """
-    """"
-    SpectoLine=Sxx.ravel()
-    time=np.linspace(0,max(t),len(SpectoLine))
-    freq = np.linspace(0, max(f), len(SpectoLine))
-    ax = plt.axes(projection='3d')
-    ax.plot3D(time, freq, SpectoLine)
-    plt.show()
-    """
-
 
 
     #Vi plottar en sinuston med våran egna
