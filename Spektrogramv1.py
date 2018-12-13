@@ -109,6 +109,7 @@ def spectoPlot(fs, sound, M):
     plt.pcolormesh(spectogram[0], spectogram[1], spectogram[2])
     plt.show()
 
+    """"
     #3D kurva
     SpectoLine = spectogram[2].ravel()
     time = np.linspace(0, max(spectogram[0]), len(SpectoLine))
@@ -118,12 +119,12 @@ def spectoPlot(fs, sound, M):
     plt.show()
 
     #3D yta
-    #X, Y = np.meshgrid(spectogram[0], spectogram[1])
-    #ax = plt.axes(projection='3d')
-    #ax.plot_surface(X, Y, spectogram[2], rstride=1, cstride=1,
-    #                cmap='plasma', edgecolor='none')
-    #plt.show()
-
+    X, Y = np.meshgrid(spectogram[0], spectogram[1])
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(X, Y, spectogram[2], rstride=1, cstride=1,
+                    cmap='plasma', edgecolor='none')
+    plt.show()
+    """
 
 def main():
     fs, sound = wavfile.read('cantina.wav')
@@ -137,22 +138,24 @@ def main():
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
     plt.show()
-
-    #X, Y = np.meshgrid(t, f)
-    #ax = plt.axes(projection='3d')
-    #ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
-    #                cmap='plasma', edgecolor='none')
-    #plt.show()
-
+    """"
+    X, Y = np.meshgrid(t, f)
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
+                    cmap='plasma', edgecolor='none')
+    plt.show()
+    """
+    """"
     SpectoLine=Sxx.ravel()
     time=np.linspace(0,max(t),len(SpectoLine))
     freq = np.linspace(0, max(f), len(SpectoLine))
     ax = plt.axes(projection='3d')
     ax.plot3D(time, freq, SpectoLine)
     plt.show()
-
-
     """
+
+
+
     #Vi plottar en sinuston med våran egna
     sinus = sinusTone(2000, 8)
     spectoPlot(1/100, sinus, 129)
@@ -169,12 +172,12 @@ def main():
     #ax = fig.add_subplot(111, projection='3d')
 
 
-    X,Y=np.meshgrid(t,f)
-    ax = plt.axes(projection='3d')
-    ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
-                    cmap='plasma', edgecolor='none')
-    plt.show()
-    """
+    #X,Y=np.meshgrid(t,f)
+    #ax = plt.axes(projection='3d')
+    #ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
+    #                cmap='plasma', edgecolor='none')
+    #plt.show()
+
 
 
 main()
