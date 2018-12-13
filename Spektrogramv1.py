@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy import signal
+from mpl_toolkits.mplot3d import Axes3D
+
 
 def sinusTone(x, tone_length):
     """
@@ -65,16 +67,10 @@ def createSpecto(fs, sound, M):
     spectogram = np.zeros((M//2, cols_amount))
     N = 0
 
-    max_ffts=[]
-    max_index=[]
-
     for j in range(cols_amount):
         if N + M <= len(sound):
             soundCol = sound[N:N + M]* hammingWindow(M)
             freqCol = np.fft.fft(soundCol)[0:M//2]
-
-            max_ffts.append(max(abs(freqCol)))
-            max_index.append(np.argmax(max(abs(freqCol))))
 
             freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
@@ -83,22 +79,25 @@ def createSpecto(fs, sound, M):
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
 
     # Vi hittar max frekvens för att få rätt skala
-    freqs = np.fft.fftfreq(M)
-    indxMax=np.argmax(max_ffts)
+    freqs = np.fft.fftfreq(len(spectogram))
+
+    max=float('Inf')
+    spectogram2=spectogram
+    count=0
+    while( max == float('Inf') ):
+        indxMax=np.unravel_index(np.argmax(spectogram2, axis=None), spectogram.shape)
+        max=spectogram2[indxMax]
+        if(max == float('Inf')):
+            spectogram2[indxMax]=0
+            count +=1
 
 
-    print(indxMax)
-    print( max_ffts[indxMax] )
-    print(max_index[indxMax])
+    freq=freqs[indxMax[0]+1]
 
-    freq=freqs[indxMax//3]
-    print(freq)
-    print(freqs)
 
     hertz=abs(freq*fs)
-    print(hertz)
 
-    freq_array = np.linspace(0, 8000, spectogram.shape[0])
+    freq_array = np.linspace(0, hertz, spectogram.shape[0])
 
     return time_array, freq_array, spectogram
 
@@ -136,6 +135,21 @@ def main():
     plt.pcolormesh(t, f, np.log(Sxx))
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
+    plt.show()
+
+    #3D plot
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+
+    X,Y=np.meshgrid(f,t)
+    Z = np.meshgrid(Sxx,t)
+    testX=np.ones((5,7))
+    testY=np.zeros((5,7))
+    testZ=np.ones((5,7))*np.random.randint(0,10)
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+                    cmap='viridis', edgecolor='none')
+    #Axes3D.plot_surface(ax,testX,testY,testZ)
     plt.show()
 
 
