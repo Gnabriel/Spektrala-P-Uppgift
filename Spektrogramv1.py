@@ -3,16 +3,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
+from scipy import signal
+from mpl_toolkits.mplot3d import Axes3D
 
 
-def sinusTone(x):
+
+def sinusTone(x, tone_length):
+
     """
     Skapar en sinuston med vald hastighet.
    :param x: Bestämmer hastigheten på sinusen
    :return: en sinuston
    """
-    vinkel = np.linspace(0, np.pi * 2, 100)
-    sinus = np.sin(x * vinkel)
+
+    vinkel = np.linspace(0,np.pi*2,100)
+    sinus = np.sin(x*vinkel)
+    for i in range(tone_length):
+        sinus = np.append(sinus, sinus)
     return sinus
 
 
@@ -56,75 +63,130 @@ def averageFreq(X):
     return np.mean(X)
 
 
-def createSpecto(sound_fft, M):
+def createSpecto(fs, sound, M):
     """
     Skapar ett spektogram.
-    :param sound: Insignal (i frek.domän)
+    :param sound: Insignal (i tidsdomän)
     :param M: För varje ny kolumn flyttar man fönstret ett fixt antal sampel M
     :return: Spektogram (array)
     """
-    N = len(sound_fft)
-    i = 0
-    spectogram = np.array(())
-    while True:
-        if i + M >= N:
-            freq = averageFreq(sound_fft[i:N])  # ska man ta mean?
-            break
-        else:
-            freq = averageFreq(sound_fft[i:i + M])
 
-        spectogram = np.append(spectogram, freq)
-        # spectogram = np.rint(spectogram) #Avrundar alla floats till ints
-        i += M
+    cols_amount = int(len(sound) / M)
+    spectogram = np.zeros((M//2, cols_amount))
+    N = 0
 
-    return spectogram
+    for j in range(cols_amount):
+        if N + M <= len(sound):
+            soundCol = sound[N:N + M]* hammingWindow(M)
+            freqCol = np.fft.fft(soundCol)[0:M//2]
 
-def longSinus(n):
-    sinus1 = sinusTone(1)
-    for x in range(0, n):
-        sinus1 = np.append(sinus1, sinus1)
+            freqCol = np.abs(np.log(freqCol**2))
+            spectogram[:, j] = freqCol
+        N += M
+    sound_time = len(sound) / fs
+    time_array = np.linspace(0, sound_time, spectogram.shape[1])
 
-    sinus12 = np.append(sinus1, sinusTone(2))
-    for x in range(0, n):
-        sinus12 = np.append(sinus12, sinusTone(2))
+    # Vi hittar max frekvens för att få rätt skala
+    #freqs = np.fft.fftfreq(len(spectogram))
 
-    sinus123 = np.append(sinus12, sinusTone(0.5))
+    max=float('Inf')
+    spectogram2=spectogram
+    #count=0
+    while( max == float('Inf') ):
+        indxMax=np.unravel_index(np.argmax(spectogram2, axis=None), spectogram.shape)
+        max=spectogram2[indxMax]
+        if(max == float('Inf')):
+            spectogram2[indxMax]=0
+            #count +=1
 
-    for x in range(0, n):
-        sinus123 = np.append(sinus123, sinusTone(0.5))
+    #freq=freqs[indxMax[0]+1]
+    #hertz=abs(freq*fs)
 
-    return sinus123
+    freq_array = np.linspace(0, 8000, spectogram.shape[0])
 
+    return time_array, freq_array, spectogram
 
+def spectoPlot(fs, sound, M):
+    """
+    Startar hela skiten samt plottar.
+    :param sound: Insignal i tidsdomänen.
+    :return: None
+    """
+    spectogram = createSpecto(fs, sound, M)
+
+    plt.pcolormesh(spectogram[0], spectogram[1], spectogram[2])
+    plt.show()
+
+    """"
+    #3D kurva
+    SpectoLine = spectogram[2].ravel()
+    time = np.linspace(0, max(spectogram[0]), len(SpectoLine))
+    freq = np.linspace(0, max(spectogram[1]), len(SpectoLine))
+    ax = plt.axes(projection='3d')
+    ax.plot3D(time, freq, SpectoLine)
+    plt.show()
+
+    #3D yta
+    X, Y = np.meshgrid(spectogram[0], spectogram[1])
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(X, Y, spectogram[2], rstride=1, cstride=1,
+                    cmap='plasma', edgecolor='none')
+    plt.show()
+    """
 
 def main():
     fs, sound = wavfile.read('cantina.wav')
-    N = len(sound)
-    M = 300
 
-    window = hammingWindow(N)
-    sound_fft = directFourier(sound, N) * window
-    # sound_fft = np.fft.fftshift(sound_fft)
+    #Vårat spectrogram
+    spectoPlot(fs, sound, 500)
 
-    spectogram = createSpecto(sound_fft, M)
-    spectogram = np.abs(spectogram)
-    spectogram = np.fft.ifft(spectogram)
-
-    sinus=longSinus(10)
-
-    arr
-
-
-
-
-    plt.plot(sinus)
+    # Numpys egna spectrogram
+    f, t, Sxx = signal.spectrogram(sound, fs)
+    plt.pcolormesh(t, f, np.log(Sxx))
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
     plt.show()
-    plt.plot(np.fft.fft(sinus))
-    plt.show()
-    sinfft=np.fft.fft(sinus)
+    """"
+    X, Y = np.meshgrid(t, f)
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
+                    cmap='plasma', edgecolor='none')
 
-    plt.plot(createSpecto(sinfft, M))
     plt.show()
+    """
+    """"
+    SpectoLine=Sxx.ravel()
+    time=np.linspace(0,max(t),len(SpectoLine))
+    freq = np.linspace(0, max(f), len(SpectoLine))
+    ax = plt.axes(projection='3d')
+    ax.plot3D(time, freq, SpectoLine)
+    plt.show()
+    """
+
+
+
+    #Vi plottar en sinuston med våran egna
+    sinus = sinusTone(2000, 8)
+    spectoPlot(1/100, sinus, 129)
+
+    #Samma sinuston med numpys egna
+    f, t, Sxx = signal.spectrogram(sinus, 1/100)
+    plt.pcolormesh(t, f, np.log(Sxx))
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    plt.show()
+
+    #3D plot
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+
+
+    #X,Y=np.meshgrid(t,f)
+    #ax = plt.axes(projection='3d')
+    #ax.plot_surface(X, Y, Sxx, rstride=1, cstride=1,
+    #                cmap='plasma', edgecolor='none')
+    #plt.show()
+
 
 
 main()
