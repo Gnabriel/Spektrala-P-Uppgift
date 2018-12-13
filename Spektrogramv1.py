@@ -8,6 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
+
 def sinusTone(x, tone_length):
 
     """
@@ -80,6 +81,11 @@ def createSpecto(fs, sound, M):
             soundCol = sound[N:N + M]* hammingWindow(M)
             freqCol = np.fft.fft(soundCol)[0:M//2]
 
+            zeroIndx=np.where(freqCol == 0)
+            if(len(zeroIndx[0])>=1):
+                for index in zeroIndx:
+                    freqCol[index]=1
+
             freqCol = np.abs(np.log(freqCol**2))
             spectogram[:, j] = freqCol
         N += M
@@ -87,18 +93,7 @@ def createSpecto(fs, sound, M):
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
 
     # Vi hittar max frekvens för att få rätt skala
-    #freqs = np.fft.fftfreq(len(spectogram))
-
-    max=float('Inf')
-    spectogram2=spectogram
-    #count=0
-    while( max == float('Inf') ):
-        indxMax=np.unravel_index(np.argmax(spectogram2, axis=None), spectogram.shape)
-        max=spectogram2[indxMax]
-        if(max == float('Inf')):
-            spectogram2[indxMax]=0
-            #count +=1
-
+    freqs = np.fft.fftfreq(len(spectogram))
     #freq=freqs[indxMax[0]+1]
     #hertz=abs(freq*fs)
 
@@ -135,6 +130,7 @@ def spectoPlot(fs, sound, M):
     """
 
 def main():
+    plt.close()
     fs, sound = wavfile.read('cantina.wav')
 
     #Vårat spectrogram
@@ -142,10 +138,22 @@ def main():
 
     # Numpys egna spectrogram
     f, t, Sxx = signal.spectrogram(sound, fs)
-    plt.pcolormesh(t, f, np.log(Sxx))
+
+    zeroIndx = np.where(Sxx == 0)
+    print(zeroIndx)
+    print(len(zeroIndx[0]))
+    print(Sxx.shape)
+    for index in zeroIndx:
+        #print(index)
+        #print(Sxx[index[0]][index[1]])
+        Sxx[index[0]][index[1]] = 1
+
+    Sxx=np.log(Sxx)
+    plt.pcolormesh(t, f, Sxx)
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
     plt.show()
+
     """"
     X, Y = np.meshgrid(t, f)
     ax = plt.axes(projection='3d')
