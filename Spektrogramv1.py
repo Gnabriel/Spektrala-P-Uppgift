@@ -64,7 +64,7 @@ def averageFreq(X):
     return np.mean(X)
 
 
-def createSpecto(fs, sound, M):
+def createSpecto(fs, sound, M, freqRange):
     """
     Skapar ett spektogram.
     :param sound: Insignal (i tidsdomän)
@@ -93,21 +93,19 @@ def createSpecto(fs, sound, M):
     time_array = np.linspace(0, sound_time, spectogram.shape[1])
 
     # Vi hittar max frekvens för att få rätt skala
-    freqs = np.fft.fftfreq(len(spectogram))
-    #freq=freqs[indxMax[0]+1]
-    #hertz=abs(freq*fs)
 
-    freq_array = np.linspace(0, 8000, spectogram.shape[0])
+    maxFreq=max(freqRange)
+    freq_array = np.linspace(0, maxFreq, spectogram.shape[0])
 
     return time_array, freq_array, spectogram
 
-def spectoPlot(fs, sound, M):
+def spectoPlot(fs, sound, M, freqRange):
     """
     Startar hela skiten samt plottar.
     :param sound: Insignal i tidsdomänen.
     :return: None
     """
-    spectogram = createSpecto(fs, sound, M)
+    spectogram = createSpecto(fs, sound, M, freqRange)
 
     plt.pcolormesh(spectogram[0], spectogram[1], spectogram[2])
     plt.show()
@@ -133,26 +131,26 @@ def main():
     plt.close()
     fs, sound = wavfile.read('cantina.wav')
 
-    #Vårat spectrogram
-    spectoPlot(fs, sound, 500)
-
     # Numpys egna spectrogram
     f, t, Sxx = signal.spectrogram(sound, fs)
 
     zeroIndx = np.where(Sxx == 0)
-    print(zeroIndx)
-    print(len(zeroIndx[0]))
-    print(Sxx.shape)
-    for index in zeroIndx:
-        #print(index)
-        #print(Sxx[index[0]][index[1]])
-        Sxx[index[0]][index[1]] = 1
+    y = zeroIndx[0]
+    x = zeroIndx[1]
+    for i in range(0, len(x)):
+        if (Sxx[y[i]][x[i]] == 0):
+            Sxx[y[i]][x[i]] = 1
 
-    Sxx=np.log(Sxx)
+    Sxx = np.log(Sxx)
     plt.pcolormesh(t, f, Sxx)
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
     plt.show()
+
+    #Vårat spectrogram
+    spectoPlot(fs, sound, 500, f)
+
+
 
     """"
     X, Y = np.meshgrid(t, f)
@@ -173,16 +171,19 @@ def main():
 
 
 
-    #Vi plottar en sinuston med våran egna
+    #Vi plottar en sinuston
     sinus = sinusTone(2000, 8)
-    spectoPlot(1/100, sinus, 129)
 
-    #Samma sinuston med numpys egna
+
+    #Sinuston med numpys egna
     f, t, Sxx = signal.spectrogram(sinus, 1/100)
     plt.pcolormesh(t, f, np.log(Sxx))
     plt.ylabel('Frequency [Hz]')
     plt.xlabel('Time [sec]')
     plt.show()
+
+    #Sinus med våran
+    spectoPlot(1 / 100, sinus, 129,f)
 
     #3D plot
     #fig = plt.figure()
